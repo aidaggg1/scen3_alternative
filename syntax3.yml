@@ -1,0 +1,56 @@
+project_name: "scen3_alternative"
+path: "/home/111319/Documentos/scen3_alternative"
+description: "This is an alternative scenario where there are four different models that calculate the maintenance cost of a car in different ways. These inputs are necessary: the car's model, brand, year, fuel type, transmission, mileage, and engine capacity. The output will be in euros."
+type: "alternative"
+common_input:
+  Brand:
+    type: string
+    default: "Honda"
+  Model:
+    type: string
+    default: "Civic"
+  Year:
+    type: integer
+    default: 2020
+    threshold: "2015-2024"
+  Fuel_Type:
+    type: string
+    default: "Petrol"
+  Transmission:
+    type: string
+    default: "Manual"
+  Mileage:
+    type: number
+    default: 15000.0
+    threshold: "12.0-30.0"
+  Engine_CC:
+    type: number
+    default: 1800.0
+    threshold: "800.0-2500.0"
+common_output:
+  name: "Car's maintenance cost in euros"
+  type: float
+  default: "Not enough data"
+common_environment:
+  type:
+    API:
+      type: "RESTful"
+      endpoint:
+        url: "http://localhost:"
+        port: 5000
+        name_endpoint: "/predict/{model_name}"
+        method: "POST"
+
+models:
+  simple_dnn:
+    path: "/home/111319/Documentos/scen3_alternative/simple_dnn"  #no tengo un archivo para cada uno
+    weight: 0.6
+  dnn:
+    path: "/home/111319/Documentos/scen3_alternative/dnn"
+    weight: 0.7
+  random_forest:
+    path: "/home/111319/Documentos/scen3_alternative/random_forest"
+    weight: 0.3
+  formula:
+    path: "/home/111319/Documentos/scen3_alternative/formula"
+    weight: 0.1
