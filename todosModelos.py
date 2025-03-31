@@ -4,7 +4,7 @@ import joblib
 import json
 import numpy as np
 import tensorflow as tf
-from cost_formula import CarMaintenanceCostCalculator
+from formula import CarMaintenanceCostCalculator
 
 app = FastAPI()
 

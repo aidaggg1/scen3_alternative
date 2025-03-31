@@ -10,7 +10,7 @@ common_input:
     type: string
     default: "Civic"
   Year:
-    type: integer
+    type: int
     default: 2020
     threshold: "2015-2024"
   Fuel_Type:
@@ -20,37 +20,64 @@ common_input:
     type: string
     default: "Manual"
   Mileage:
-    type: number
+    type: float
     default: 15000.0
     threshold: "12.0-30.0"
   Engine_CC:
-    type: number
+    type: float
     default: 1800.0
     threshold: "800.0-2500.0"
 common_output:
   name: "Car's maintenance cost in euros"
   type: float
   default: "Not enough data"
-common_environment:
-  type:
-    API:
-      type: "RESTful"
-      endpoint:
-        url: "http://localhost:"
-        port: 5000
-        name_endpoint: "/predict/{model_name}"
-        method: "POST"
 
 models:
   simple_dnn:
-    path: "/home/111319/Documentos/scen3_alternative/simple_dnn"  #no tengo un archivo para cada uno
+    path: "/home/111319/Documentos/scen3_alternative/simple_dnn"
     weight: 0.6
+    environment:
+      type:
+        API:
+          type: "RESTful"
+          endpoint:
+            url: "http://localhost:"
+            port: 8010
+            name_endpoint: "/predict"
+            method: "POST"
   dnn:
     path: "/home/111319/Documentos/scen3_alternative/dnn"
     weight: 0.7
+    environment:
+      type:
+        API:
+          type: "RESTful"
+          endpoint:
+            url: "http://localhost:"
+            port: 8011
+            name_endpoint: "/predict"
+            method: "POST"
   random_forest:
     path: "/home/111319/Documentos/scen3_alternative/random_forest"
     weight: 0.3
+    environment:
+      type:
+        API:
+          type: "RESTful"
+          endpoint:
+            url: "http://localhost:"
+            port: 8012
+            name_endpoint: "/predict"
+            method: "POST"
   formula:
     path: "/home/111319/Documentos/scen3_alternative/formula"
     weight: 0.1
+    environment:
+      type:
+        API:
+          type: "RESTful"
+          endpoint:
+            url: "http://localhost:"
+            port: 8013
+            name_endpoint: "/predict"
+            method: "POST"
