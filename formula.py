@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from pydantic import BaseModel, validator
 
+#formula code
+
 class CarMaintenanceCostCalculator:
     def __init__(self, brand, model, year, fuel_type, transmission, mileage, engine_CC):
         self.brand = brand
@@ -11,7 +13,7 @@ class CarMaintenanceCostCalculator:
         self.mileage = mileage
         self.engine_CC = engine_CC
 
-    #based on the fuel type the car maintenance will be different
+    #based on the fuel type, the car maintenance cost will be different
     def get_fuel_type_factor(self):
         fuel_type_factors = {
             "Petrol": 45,
@@ -48,7 +50,7 @@ class CarMaintenanceCostCalculator:
 
         return maintenance_cost
 
-#api
+#api code
 
 VALID_BRANDS = ['Honda', 'Hyundai', 'Kia', 'Mahindra', 'Maruti Suzuki', 'Renault', 'Skoda', 'Tata Motors', 'Toyota', 'Volkswagen']
 VALID_MODELS = ['Altroz', 'Amaze', 'Baleno', 'Bolero', 'Camry', 'Carens', 'Carnival', 'City', 'Civic', 'Creta', 'Duster', 'Dzire',
@@ -93,10 +95,8 @@ class CarData(BaseModel):
             raise ValueError(f"Invalid transmission, it must be one of: {', '.join(VALID_TRANSMISSIONS)}")
         return v
 
-#client can choose which model use when executing the api
 @app.post("/predict")
 async def predict(car_data: CarData):
-
     #using formula
     calculator = CarMaintenanceCostCalculator(
         brand=car_data.Brand,

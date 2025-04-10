@@ -31,7 +31,7 @@ model_to_code = {v: k for k, v in model_codes.items()}
 fuel_to_code = {v: k for k, v in fuel_type_codes.items()}
 
 #load the scaler
-scaler = joblib.load('encoders/scaler_cars.pkl')
+scaler = joblib.load('scalers/scaler_cars.pkl')
 
 class CarData(BaseModel):
     Brand: str
@@ -75,13 +75,12 @@ def preprocess_input(data: CarData):
     data_dict['Transmission'] = 0 if data_dict['Transmission'] == 'Manual' else 1
     return np.array([[data_dict['Brand'], data_dict['Model'], data_dict['Year'], data_dict['Fuel_Type'], data_dict['Transmission'], data_dict['Mileage'], data_dict['Engine_CC']]])
 
-#client can choose which model use when executing the api
 @app.post("/predict")
 async def predict(car_data: CarData):
     input_data = preprocess_input(car_data)
     input_data = scaler.transform(input_data)
 
-    #calculate the cost using all models
+    #make the prediction
     prediction_dnn = model_dnn.predict(input_data)
     response = round(float(prediction_dnn[0]), 2)
 

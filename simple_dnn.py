@@ -5,6 +5,7 @@ import json
 import numpy as np
 from pydantic import BaseModel, validator
 
+#same used when training the model
 VALID_BRANDS = ['Honda', 'Hyundai', 'Kia', 'Mahindra', 'Maruti Suzuki', 'Renault', 'Skoda', 'Tata Motors', 'Toyota', 'Volkswagen']
 VALID_MODELS = ['Altroz', 'Amaze', 'Baleno', 'Bolero', 'Camry', 'Carens', 'Carnival', 'City', 'Civic', 'Creta', 'Duster', 'Dzire',
                 'EV6', 'Ertiga', 'Fortuner', 'Glanza', 'Harrier', 'Innova', 'Jazz', 'Kiger', 'Kushaq', 'Kwid', 'Lodgy', 'Nexon', 'Octavia',
@@ -31,7 +32,7 @@ model_to_code = {v: k for k, v in model_codes.items()}
 fuel_to_code = {v: k for k, v in fuel_type_codes.items()}
 
 #load the scaler
-scaler = joblib.load('encoders/scaler_cars.pkl')
+scaler = joblib.load('scalers/scaler_cars.pkl')
 
 #create this class for inputs and validate the data entered
 class CarData(BaseModel):
@@ -76,13 +77,12 @@ def preprocess_input(data: CarData):
     data_dict['Transmission'] = 0 if data_dict['Transmission'] == 'Manual' else 1
     return np.array([[data_dict['Brand'], data_dict['Model'], data_dict['Year'], data_dict['Fuel_Type'], data_dict['Transmission'], data_dict['Mileage'], data_dict['Engine_CC']]])
 
-#client can choose which model use when executing the api
 @app.post("/predict")
 async def predict(car_data: CarData):
     input_data = preprocess_input(car_data)
     input_data = scaler.transform(input_data)
 
-    #calculate the cost using all models
+    #make the prediction of the cost
     prediction_simple_dnn = model_simple_dnn.predict(input_data)
     response = round(float(prediction_simple_dnn[0]), 2)
 

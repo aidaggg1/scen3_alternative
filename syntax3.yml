@@ -21,7 +21,7 @@ common_input:
     default: "Manual"
   Mileage:
     type: float
-    default: 15000.0
+    default: 16.0
     threshold: "12.0-30.0"
   Engine_CC:
     type: float
@@ -33,8 +33,8 @@ common_output:
   default: "Not enough data"
 
 models:
-  simple_dnn:
-    path: "/home/111319/Documentos/scen3_alternative/simple_dnn"
+  Simple DNN:
+    path: "/home/111319/Documentos/scen3_alternative/simple_dnn.py"
     weight: 0.6
     environment:
       type:
@@ -45,8 +45,8 @@ models:
             port: 8010
             name_endpoint: "/predict"
             method: "POST"
-  dnn:
-    path: "/home/111319/Documentos/scen3_alternative/dnn"
+  DNN:
+    path: "/home/111319/Documentos/scen3_alternative/dnn.py"
     weight: 0.7
     environment:
       type:
@@ -57,8 +57,8 @@ models:
             port: 8011
             name_endpoint: "/predict"
             method: "POST"
-  random_forest:
-    path: "/home/111319/Documentos/scen3_alternative/random_forest"
+  Random forest:
+    path: "/home/111319/Documentos/scen3_alternative/random_forest.py"
     weight: 0.3
     environment:
       type:
@@ -69,8 +69,8 @@ models:
             port: 8012
             name_endpoint: "/predict"
             method: "POST"
-  formula:
-    path: "/home/111319/Documentos/scen3_alternative/formula"
+  Formula:
+    path: "/home/111319/Documentos/scen3_alternative/formula.py"
     weight: 0.1
     environment:
       type:
