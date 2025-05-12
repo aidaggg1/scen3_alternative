@@ -75,45 +75,45 @@ def get_introduce_inputs(syntax):
 
     return introduce_inputs
 
-#function for reading environment
-def read_environment(syntax, model_name=None):
-    if "common_environment" in syntax:
-        environment_data = syntax["common_environment"]
+#function for reading servitization_technology
+def read_servitization_technology(syntax, model_name=None):
+    if "common_servitization_technology" in syntax:
+        servitization_technology_data = syntax["common_servitization_technology"]
     else:
-        environment_data = syntax["models"][model_name]["environment"]
+        servitization_technology_data = syntax["models"][model_name]["servitization_technology"]
 
-    env_type = environment_data["type"]
+    serv_type = servitization_technology_data["type"]
 
-    environment_name = list(env_type.keys())[0]  #getting API or pub-sub ---- it's env_type's key
-    data_env = env_type[environment_name]  #getting everything inside API
-    env_name = data_env["type"]  #getting RESTful or MQTT
+    servitization_technology_name = list(serv_type.keys())[0]  #getting API or pub-sub ---- it's serv_type's key
+    data_serv = serv_type[servitization_technology_name]  #getting everything inside API
+    serv_name = data_serv["type"]  #getting RESTful or MQTT
 
-    env_info = {
-        "name": environment_name, #API
-        "type": env_name  #Restful                 #NECESARIO PARA ALGO???????
+    serv_info = {
+        "name": servitization_technology_name, #API
+        "type": serv_name  #Restful                 #NECESARIO PARA ALGO???????
     }
 
     #if it is an API --> url
-    if environment_name == "API":
-        endpoint_data = data_env["endpoint"]
+    if servitization_technology_name == "API":
+        endpoint_data = data_serv["endpoint"]
         url = endpoint_data["url"]
         port = endpoint_data["port"]
         endpoint_name = endpoint_data["name_endpoint"]
         endpoint_method = endpoint_data["method"]
         full_url = f"{url}{port}{endpoint_name}"
-        env_info["full_url"] = full_url  #save the whole url
-        env_info["endpoint_method"] = endpoint_method
+        serv_info["full_url"] = full_url  #save the whole url
+        serv_info["endpoint_method"] = endpoint_method
 
     #if it is pub-sub --> broker + queue
-    elif environment_name == "pub-sub":
-        broker = data_env["broker"]
-        queue_in = data_env["queue_input"]
-        queue_out = data_env["queue_output"]
-        env_info["broker"] = broker
-        env_info["queue_in"] = queue_in
-        env_info["queue_out"] = queue_out
+    elif servitization_technology_name == "pub-sub":
+        broker = data_serv["broker"]
+        queue_in = data_serv["queue_input"]
+        queue_out = data_serv["queue_output"]
+        serv_info["broker"] = broker
+        serv_info["queue_in"] = queue_in
+        serv_info["queue_out"] = queue_out
 
-    return env_info
+    return serv_info
 
 def open_image_file(image_path: str):
     #verify the path
@@ -145,7 +145,6 @@ def prepare_model_inputs(syntax, models_data: Dict[str, Dict[str, Any]]) -> Dict
                 inputs_model[input_name] = value
 
         #I send to each model its own inputs , first get if this model is and api or pub-sub
-        print(f"this is sent to send_to_model {inputs_model}, {model_name}")
         if syntax["type"] == "secuential":
             responses_sec.update(send_to_model(syntax, inputs_model, model_name))
         else:
@@ -169,7 +168,7 @@ def prepare_model_inputs(syntax, models_data: Dict[str, Dict[str, Any]]) -> Dict
 
         #for each model that is not priority 1 --> send to the next model the previous response
         for not1 in not_one_priorities:
-            print(f"iteracion en esc dep {response} se envia a modelo {not1}")
+            print(f"iteracion en esc dep {response} se servia a modelo {not1}")
             response = send_to_model(syntax, response, not1)
 
         #once I have all the responses, I write an output to the user
@@ -192,18 +191,17 @@ def send_to_model(syntax, inputs: dict, model_name: str):
         else:
             json_data[key] = value  #if it is not file, add it as json data
 
-    #first I have to know how is the environment of this model
-    env = read_environment(syntax, model_name)
-    type_model = env["name"]
+    #first I have to know how is the servitization_technology of this model
+    serv = read_servitization_technology(syntax, model_name)
+    type_model = serv["name"]
 
     #if the actual model is an api
     if type_model == "API":
-        method = env["endpoint_method"].lower()
+        method = serv["endpoint_method"].lower()
         if method in ["get", "post", "put", "delete"]:
             try:
                 #if there are no files, "files" is not send. Same with "json_data"
-                print(f"esto se envia a la api en send to model {json_data}")
-                response = requests.request(method, env["full_url"], files=files if files else None, json=json_data if json_data else None)
+                response = requests.request(method, serv["full_url"], files=files if files else None, json=json_data if json_data else None)
                 #when a request is made, the model responses a prediction
                 print(f"Response in API (process_syntax.py): {response.status_code} - {response.json()}")
                 resp_content = response.json()
@@ -223,9 +221,9 @@ def send_to_model(syntax, inputs: dict, model_name: str):
     #if the model is pub-sub
     elif type_model == "pub-sub":       #the orchestrator publishes is the queue for input and the el model listenes on it
                                         #the model publishes in the queue for output and the orchestrator listens on it
-        broker = env["broker"]
-        queue_in = env["queue_in"]
-        queue_out = env["queue_out"]
+        broker = serv["broker"]
+        queue_in = serv["queue_in"]
+        queue_out = serv["queue_out"]
         def on_message(client, userdata, msg):
             print(f"Received message from MQTT broker (process.py): {msg.payload.decode()}")
             response = msg.payload.decode()
@@ -290,8 +288,6 @@ def validate_output_threshold(syntax, model_name, value):
 
 #this function gives the final output which the user will read to understand what is happening in the system
 def prepare_output(syntax, responses: Dict[str, Any]):
-    print(f"This is what prepare_output receives: {responses}")
-
     scenario = syntax["type"]
     print(f"Since you are in a {scenario} scenario type, this is the information about the system")
 
@@ -313,13 +309,13 @@ def prepare_output(syntax, responses: Dict[str, Any]):
                     continue  # skip this model
 
                 for key, value in prediction_data.items():
-                    print(f"(process.py) The model '{model_name}' response is '{key}: {value}'")
+                    print(f"The model '{model_name}' response is '{key}: {value}'")
                     validate_output_threshold(syntax, model_name, value)
 
             #if it is a dict
             elif isinstance(response, dict):
                 for key, value in response.items():
-                    print(f"(process.py) The model '{model_name}' response is '{key}: {value}'")
+                    print(f"The model '{model_name}' response is '{key}: {value}'")
                     validate_output_threshold(syntax, model_name, value)
 
             ##if it is a str

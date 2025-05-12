@@ -36,7 +36,7 @@ models:
   Simple DNN:
     path: "/home/111319/Documentos/scen3_alternative/simple_dnn.py"
     weight: 0.6
-    environment:
+    servitization_technology:
       type:
         API:
           type: "RESTful"
@@ -48,7 +48,7 @@ models:
   DNN:
     path: "/home/111319/Documentos/scen3_alternative/dnn.py"
     weight: 0.7
-    environment:
+    servitization_technology:
       type:
         API:
           type: "RESTful"
@@ -60,7 +60,7 @@ models:
   Random forest:
     path: "/home/111319/Documentos/scen3_alternative/random_forest.py"
     weight: 0.3
-    environment:
+    servitization_technology:
       type:
         API:
           type: "RESTful"
@@ -72,7 +72,7 @@ models:
   Formula:
     path: "/home/111319/Documentos/scen3_alternative/formula.py"
     weight: 0.1
-    environment:
+    servitization_technology:
       type:
         API:
           type: "RESTful"
