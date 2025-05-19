@@ -82,9 +82,9 @@ async def predict(car_data: CarData):
 
     #make the prediction
     prediction_dnn = model_dnn.predict(input_data)
-    response = round(float(prediction_dnn[0]), 2)
+    response = round(float(prediction_dnn[0].item()), 2)
 
-    return {"Service cost using DNN is": response}
+    return {"Service cost using DNN is ": response}
 
 if __name__ == '__main__':
     import uvicorn

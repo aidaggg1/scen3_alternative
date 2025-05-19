@@ -84,7 +84,7 @@ async def predict(car_data: CarData):
     prediction_random_forest = model_random_forest.predict(input_data)
     response = round(float(prediction_random_forest[0]), 2)
 
-    return {"Service cost using random forest is": response}
+    return {"Service cost using random forest is ": response}
 
 if __name__ == '__main__':
     import uvicorn
