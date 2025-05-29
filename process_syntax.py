@@ -155,7 +155,7 @@ def prepare_model_inputs(syntax, models_data: Dict[str, Dict[str, Any]]) -> Dict
     #if not dependent scenario, I have already been communicated with all the models - so I can call now prepare_output
     if syntax["type"] != "dependent":
         # call to prepare_output with all the responses from all models
-        prepare_output(syntax, responses)
+        return prepare_output(syntax, responses)
 
     #if the scenario is dependent, the output of one model is the input of the next one. So the response of the first has to be sent to the second
     else:
@@ -173,7 +173,7 @@ def prepare_model_inputs(syntax, models_data: Dict[str, Dict[str, Any]]) -> Dict
             response = communicate_model(syntax, response, not1)
 
         #once I have all the responses, I write an output to the user
-        prepare_output(syntax, response)
+        return prepare_output(syntax, response)
 
 #this function manages the communication between C --> Model. Sends the input and receives the prediction
 def communicate_model(syntax, inputs: dict, model_name: str):
@@ -295,8 +295,6 @@ def validate_output_threshold(syntax, model_name, value):
         lower_bound, upper_bound = map(int, output_threshold.split('-'))
         if not (lower_bound <= value <= upper_bound):
             print("The value calculated by the model is out of the specified threshold")
-        else:
-            print("The value calculated by the model is inside the specified threshold")
     else:
         return  #if there is not specified an output threshold do nothing
 
@@ -304,10 +302,19 @@ def validate_output_threshold(syntax, model_name, value):
 #this function gives the final output which the user will read to understand what is happening in the system
 def prepare_output(syntax, responses: Union[Dict[str, Any], str]):
     scenario = syntax["type"]
-    print(f"Since you are in a {scenario} scenario type, this is the information about the system")
+
+    text = {"description": f"Since you are in a {scenario} scenario type, this is the information about the system. ",
+            "output": {}
+            }
 
     if scenario == "dependent":
-        print(f"The final response is {responses}")
+        text["description"] += f"The final response is {responses}"
+        text["output"] = str(responses)
+
+    elif scenario == "alternative":
+        av = calculate_weighted_average(syntax, responses)
+        text["description"] +=f"The average calculated is: {av}"
+        text["output"]["Average"] = av
 
     else:
         for model_name, response in responses.items():
@@ -320,30 +327,30 @@ def prepare_output(syntax, responses: Union[Dict[str, Any], str]):
                 if isinstance(first_element, dict):
                     prediction_data = first_element
                 else:
-                    print(f"Data structure in the model {model_name} is not valid")
+                    text["description"] += f"Data structure in the model {model_name} is not valid."
                     continue  # skip this model
 
                 for key, value in prediction_data.items():
-                    print(f"The model '{model_name}' response is '{key}: {value}'")
+                    text["description"] += f"The model '{model_name}' response is '{key}: {value}. '"
+                    text["output"][model_name] = f"{key}: {value}"
                     validate_output_threshold(syntax, model_name, value)
 
             #if it is a dict
             elif isinstance(response, dict):
                 for key, value in response.items():
-                    print(f"The model '{model_name}' response is '{key}: {value}'")
+                    text["description"] += f"The model '{model_name}' response is '{key}: {value}'"
+                    text["output"][model_name] = f"{key}: {value}"
                     validate_output_threshold(syntax, model_name, value)
 
             #if it is a str
             elif isinstance(response, str):
-                print(f"The model '{model_name}' response is '{response}'")
-                validate_output_threshold(syntax, model_name, response)
+                text["description"] += f"The model '{model_name}' response is '{response}'"
+                text["output"][model_name] = response
 
             else:
-                print(f"Error. The model '{model_name}' response is not valid.")
+                text["description"] += f"Error. The model '{model_name}' response is not valid."
 
-        if scenario == "alternative":
-            av = calculate_weighted_average(syntax, responses)
-            print(f"But as it as an alternative scenario, the average calculated is: {av}")
+    return text
 
 #for scenario == alternative
 def calculate_weighted_average(syntax, responses):
@@ -467,9 +474,9 @@ def main():
                 first_models_data[model_name] = {key: value for key, value in introduced_data.items() if
                                                  key in [input_data['name'] for input_data in inputs.values()]}
 
-            prepare_model_inputs(syntax, first_models_data)
-
-            return {"message": "Data is correct", "data": first_models_data}
+            mes = prepare_model_inputs(syntax, first_models_data)
+            return {"message" : mes}
+            #return {"message": "Data is correct", "data": first_models_data}
 
         except ValidationError as e:
             raise HTTPException(status_code=400, detail=str(e))
